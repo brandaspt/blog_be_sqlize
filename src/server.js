@@ -22,8 +22,8 @@ server.use(errorHandler)
 
 // Server and DB connection
 sequelize
-  .authenticate()
+  .sync({ alter: true })
   .then(() => {
-    server.listen(PORT, () => console.log("Server running and connected to DB. Listening on port " + PORT))
+    server.listen(PORT, () => console.log("Server running and listening on port " + PORT))
   })
-  .catch(error => console.error("Unable to connect:", error))
+  .catch(error => console.error("Unable to start server:", error))

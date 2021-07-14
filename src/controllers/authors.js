@@ -1,81 +1,51 @@
-import { pool } from "../config/db.js"
+import models from "../models/index.js"
 import createError from "http-errors"
 
-import { updateValues } from "../utils/queries.js"
+const { Author } = models
 
 export const getAllAuthors = async (req, res, next) => {
-  const query = `
-  SELECT * FROM authors
-  ORDER BY created_at ASC
-  `
   try {
-    const { rows } = await pool.query(query)
-    res.json(rows)
+    const authors = await Author.findAll()
+    res.json(authors)
   } catch (error) {
     next(error)
   }
 }
 export const addNewAuthor = async (req, res, next) => {
-  const { name, surname } = req.body
-  const avatar = `https://eu.ui-avatars.com/api/?name=${name}+${surname}`
-  const query = `
-  INSERT INTO authors (name, surname, avatar)
-  VALUES ('${name}', '${surname}', '${req.body.avatar || avatar}')
-  RETURNING *
-  `
   try {
-    const { rows } = await pool.query(query)
-    res.json(rows[0])
+    const newAuthor = await Author.create(req.body)
+    res.json(newAuthor)
   } catch (error) {
-    next(error)
+    next(createError(400, error))
   }
 }
 export const getSingleAuthor = async (req, res, next) => {
   const authorId = req.params.authorId
-  const query = `
-  SELECT * FROM authors
-  WHERE id=${authorId}
-  `
   try {
-    const { rowCount, rows } = await pool.query(query)
-    if (!rowCount) return next(createError(404, `Author with id ${authorId} not found`))
-    res.json(rows[0])
+    const foundAuthor = await Author.findByPk(parseInt(authorId))
+    if (!foundAuthor) return next(createError(404, `Author with id ${authorId} not found`))
+    res.json(foundAuthor)
   } catch (error) {
-    if (error.code === "42703") res.status(400).json(error)
-    else next(createError(500, error))
+    next(createError(500, error))
   }
 }
 export const deleteAuthor = async (req, res, next) => {
   const authorId = req.params.authorId
-  const query = `
-  DELETE FROM authors
-  WHERE id=${authorId}
-  RETURNING *
-  `
   try {
-    const { rowCount, rows } = await pool.query(query)
-    if (!rowCount) return next(createError(404, `Author with id ${authorId} not found`))
-    res.json({ message: "Author deleted successfully", author: rows[0] })
+    const resp = await Author.destroy({ where: { id: authorId } })
+    if (!resp) return next(createError(404, `Author with id ${authorId} not found`))
+    res.json({ ok: true, message: "Author deleted successfully." })
   } catch (error) {
-    if (error.code === "42703") res.status(400).json(error)
-    else next(createError(500, error))
+    next(createError(500, error))
   }
 }
 export const editAuthor = async (req, res, next) => {
   const authorId = req.params.authorId
-  const valuesStr = updateValues(req.body)
-  const query = `
-  UPDATE authors
-  SET ${valuesStr}
-  WHERE id=${authorId}
-  RETURNING *
-  `
   try {
-    const { rowCount, rows } = await pool.query(query)
-    if (!rowCount) return next(createError(404, `Author with id ${authorId} not found`))
-    res.json({ message: "Author updated successfully", author: rows[0] })
+    const updatedAuthor = await Author.update(req.body, { where: { id: authorId }, returning: true, individualHooks: true })
+    if (!updatedAuthor[0]) return next(createError(404, `Author with id ${authorId} not found`))
+    res.json(updatedAuthor[1][0])
   } catch (error) {
-    if (error.code === "42703") res.status(400).json(error)
-    else next(createError(500, error))
+    next(createError(500, error))
   }
 }

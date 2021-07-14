@@ -1,9 +1,5 @@
-import { pool } from "../config/db.js"
+import Post from "../models/post.js"
 import createError from "http-errors"
-import readingTime from "reading-time"
-import striptags from "striptags"
-
-import { updateValues } from "../utils/queries.js"
 
 export const getAllPosts = async (req, res, next) => {
   const query = `
