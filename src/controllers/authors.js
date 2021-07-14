@@ -1,11 +1,42 @@
 import models from "../models/index.js"
 import createError from "http-errors"
+import sequelize from "sequelize"
 
-const { Author } = models
+const { Op } = sequelize
+
+const { Author, Post } = models
 
 export const getAllAuthors = async (req, res, next) => {
+  // const keys = Object.keys(req.query)
+  // const query = {}
+  // keys.forEach(key => {
+  //   if (["name", "surname"].includes(key)) {
+  //     query[Op.or]
+  //       ? query[Op.or].push({ [key]: { [Op.substring]: req.query[key] } })
+  //       : (query[Op.or] = [{ [key]: { [Op.substring]: req.query[key] } }])
+  //   }
+  // })
+
   try {
-    const authors = await Author.findAll()
+    const authors = await Author.findAll({
+      // include: Post,
+      where: req.query.name
+        ? {
+            [Op.or]: [
+              {
+                name: {
+                  [Op.iLike]: `%${req.query.name}%`,
+                },
+              },
+              {
+                surname: {
+                  [Op.iLike]: `%${req.query.name}%`,
+                },
+              },
+            ],
+          }
+        : {},
+    })
     res.json(authors)
   } catch (error) {
     next(error)
