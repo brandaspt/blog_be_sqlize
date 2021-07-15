@@ -14,10 +14,6 @@ const Post = sequelize.define(
       allowNull: false,
       autoIncrement: true,
     },
-    category: {
-      type: DataTypes.STRING(20),
-      allowNull: false,
-    },
     title: {
       type: DataTypes.STRING(50),
       allowNull: false,
