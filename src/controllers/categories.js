@@ -1,19 +1,23 @@
 import models from "../models/index.js"
 import createError from "http-errors"
-// import sequelize from "sequelize"
+import sequelize from "sequelize"
 
 const { Category, Post } = models
 
 export const getAllCategories = async (req, res, next) => {
   try {
     const categories = await Category.findAll({
+      // attributes: ["id", "name", "post.id", [sequelize.fn("count", "post.id"), "total"]],
+      // attributes: ["categories.id", "name", [sequelize.fn("count", sequelize.col("posts", "id")), "totalPosts"]],
       include: {
         model: Post,
         attributes: ["id", "title", "authorId"],
         separate: true, // Required to order posts
         order: ["title"], // Ordering posts by title
       },
+      // group: ["categories.id"],
       order: ["id"], // Ordering categories by id
+      // raw: true,
     })
     res.json(categories)
   } catch (error) {

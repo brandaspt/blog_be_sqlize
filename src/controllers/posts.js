@@ -1,11 +1,26 @@
 import models from "../models/index.js"
 import createError from "http-errors"
 
-const { Post, Author } = models
+const { Post, Author, Category, Comment } = models
 
 export const getAllPosts = async (req, res, next) => {
   try {
-    const posts = await Post.findAll({ include: Author })
+    const posts = await Post.findAll({
+      include: [
+        {
+          model: Author,
+          attributes: ["id", "name", "surname"],
+        },
+        {
+          model: Category,
+          attributes: ["id", "name"],
+        },
+        {
+          model: Comment,
+          attributes: ["id", "authorName", "content"],
+        },
+      ],
+    })
     res.json(posts)
   } catch (error) {
     next(createError(500, error))

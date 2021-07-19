@@ -4,6 +4,7 @@ import cors from "cors"
 import authorsRouter from "./services/authors.js"
 import postsRouter from "./services/posts.js"
 import categoriesRouter from "./services/categories.js"
+import commentsRouter from "./services/comments.js"
 import { errorHandler } from "./errorHandlers.js"
 import { sequelize } from "./config/db.js"
 
@@ -18,6 +19,7 @@ server.use(express.json())
 server.use("/authors", authorsRouter)
 server.use("/blogPosts", postsRouter)
 server.use("/categories", categoriesRouter)
+server.use("/comments", commentsRouter)
 
 // ERROR HANDLERS
 server.use(errorHandler)
